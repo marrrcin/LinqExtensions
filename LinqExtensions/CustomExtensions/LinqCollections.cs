@@ -72,26 +72,40 @@ namespace LinqExtensions.CustomExtensions
             var indexes = new int[toMerge.Length];
             var current = new List<T>(toMerge.Length);
             Enumerable.Range(0,toMerge.Length).ToList().ForEach(f=>current.Add(default(T)));;
-            var completed = new List<int>(toMerge.Length);
-            int i = 0;
-            while (indexes.Sum() != allCount)
+            var isCompleted = new bool[toMerge.Length];
+            int completed = 0;
+            int i = 0, minIdx = 0;
+            T min = default (T);
+            while (completed != toMerge.Length)
             {
-                completed.Clear();
+                
                 for (i = 0; i < toMerge.Length; i++)
                 {
-                    if (indexes[i] < toMerge[i].Count)
+                    if (!isCompleted[i])
                     {
-                        current[i] = toMerge[i][indexes[i]];
-                    }
-                    else
-                    {
-                        completed.Add(i);
+                        min = toMerge[i][indexes[i]];
+                        minIdx = i;
+                        break;
                     }
                 }
 
-                var minWithIndex = current.MinWithIndexWithSkipping(compare,completed.ToArray());
-                ++indexes[minWithIndex.Item1];
-                yield return minWithIndex.Item2;
+                for (i = 0; i < toMerge.Length; i++)
+                {
+                    if (!isCompleted[i] && compare(min,toMerge[i][indexes[i]]))
+                    {
+                        min = toMerge[i][indexes[i]];
+                        minIdx = i;
+                    }
+                }
+
+                ++indexes[minIdx];
+                if (indexes[minIdx] == toMerge[minIdx].Count)
+                {
+                    isCompleted[minIdx] = true;
+                    ++completed;
+                }
+
+                yield return min;
             }
         }
 
