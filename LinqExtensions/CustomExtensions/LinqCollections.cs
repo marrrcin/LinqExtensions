@@ -67,38 +67,59 @@ namespace LinqExtensions.CustomExtensions
             }
         }
 
+        public static IEnumerable<T> Merge<T>(Func<T, T, int> compare, bool removeDuplicates, params IList<T>[] toMerge)
+        {
+            
+        }
+
         public static IEnumerable<T> Merge<T>(Func<T,T,int> compare,params IList<T>[] toMerge)
         {
-            toMerge.Aggregate(0, (sum, arrayToMerge) => sum + arrayToMerge.Count);
             var indexes = new int[toMerge.Length];
-            var queue = new SortedDictionary<T, int>(new LinqDynamicComparer<T>(compare));
+            var queue = new SortedDictionary<T, LinkedList<Tuple<int,T>>>(new LinqDynamicComparer<T>(compare));
 
             int completed = 0;
             int i = 0;
-
+            T current;
             for (i = 0; i < toMerge.Length; i++)
             {
-                queue.Add(toMerge[i][0], i);
+                current = toMerge[i][0];
+                AddToQueue(queue, current, i);
             }
 
-            KeyValuePair<T, int> top;
+            KeyValuePair<T, LinkedList<Tuple<int,T>>> top;
+            int idx;
             while (completed != toMerge.Length)
             {
                 top = queue.First();
                 queue.Remove(top.Key);
 
-                ++indexes[top.Value];
-                if (indexes[top.Value] != toMerge[top.Value].Count)
+                foreach (var pair in top.Value)
                 {
-                    queue.Add(toMerge[top.Value][indexes[top.Value]],top.Value);
-                }
-                else
-                {
-                    ++completed;
-                }
+                    idx = pair.Item1;
+                    current = pair.Item2;
+                    yield return current;
 
-                yield return top.Key;
+                    ++indexes[idx];
+                    if (indexes[idx] != toMerge[idx].Count)
+                    {
+                        AddToQueue(queue,current,idx);
+                    }
+                    else
+                    {
+                        ++completed;
+                    }
+                }
             }
+        }
+
+        private static void AddToQueue<T>(SortedDictionary<T, LinkedList<Tuple<int, T>>> queue, T current, int i)
+        {
+            if (!queue.ContainsKey(current))
+            {
+                queue.Add(current, new LinkedList<Tuple<int, T>>());
+            }
+
+            queue[current].AddLast(new Tuple<int, T>(i, current));
         }
 
         public static Tuple<int, T> MinWithIndexWithSkipping<T>(this IList<T> collection, Func<T, T, bool> compare,
