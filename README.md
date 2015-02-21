@@ -1,7 +1,7 @@
 LinqExtensions
 ==============
 
-Some useful LINQ extensions like IComparer(T) and IEqualityComparer(T) lambda wrappers.
+Some useful LINQ extensions like IComparer(T) and IEqualityComparer(T) lambda wrappers, linq permutations, linq merge, linq flatten.
 
 ## Linq Shuffle
 You can use IEnumerable.Shuffle() to shuffle arrays etc. For example:<br/>
@@ -115,3 +115,82 @@ B C A
 C A B 
 C B A 
 ```
+
+## Linq Flatten
+You can use IEnumerable.Flatten, to flatten deeply nested collections. There are two implementations - recursive and non recursive.
+Example:
+```
+var array = new dynamic[]
+{
+    new[] {"lol", "xyz", "abc"},
+    new dynamic[] {"lol2", new dynamic[] {"nested1", new[] {"nested2","nested2-other"}}},
+    "trolo"
+};
+
+var result = array.Flatten<string>();
+//or non recursive implementation:
+result = array.Flatten<string>(false);
+```
+Result:
+```
+    [0]: "lol"
+    [1]: "xyz"
+    [2]: "abc"
+    [3]: "lol2"
+    [4]: "nested1"
+    [5]: "nested2"
+    [6]: "nested2-other"
+    [7]: "trolo"
+```
+
+## Linq Merge
+You can use 
+```
+LinqCollections.Merge<T>(Func<T,T,int> compare,params IList<T>[] toMerge)
+```
+to merge any number of lists (they should be sorted). There is an additional overload which can remove duplicates:
+```
+LinqCollections.Merge<T>(Func<T,T,int> compare,true,params IList<T>[] toMerge)
+```
+Example 1:
+```
+var array1 = Enumerable.Range(0, 15).Where(i=>i%3==0).ToList();
+var array2 = Enumerable.Range(0, 15).Where(i=>i%3==1).ToList();
+var array3 = Enumerable.Range(0, 15).Where(i=>i%3==2).ToList();
+
+var result = LinqCollections.Merge((a, b) => a - b, array1, array2,array3);
+```
+Result 1:
+```
+    [0]: 0
+    [1]: 0
+    [2]: 0
+    [3]: 0
+    [4]: 0
+    [5]: 1
+    [6]: 1
+    [7]: 1
+    [8]: 1
+    [9]: 1
+    [10]: 2
+    [11]: 2
+    [12]: 2
+    [13]: 2
+    [14]: 2
+```
+
+Example 2 (remove duplicates):
+```
+var array1 = Enumerable.Range(0, 1000).Select(i => 2).ToList();
+var array2 = Enumerable.Range(0, 1000).Select(i => 1).ToList();
+
+var result = LinqCollections.Merge((a, b) => a - b,true, array1, array2);
+```
+Result 2:
+```
+    [0]: 1
+    [1]: 2
+```
+
+## Linq Minimum with Index
+You can use IEnumerable.MinWithIndex to get Tuple of your Type & Index of minimum element from Enumerable.
