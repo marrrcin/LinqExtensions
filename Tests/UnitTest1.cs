@@ -102,5 +102,24 @@ namespace Tests
                 Assert.IsTrue(result[i - 1] <= result[i]);
             }
         }
+
+        [TestMethod]
+        public void CanMergeWithRemoveDuplicates()
+        {
+            var array1 = Enumerable.Range(0, 1000).Select(i => 2).ToList();
+            var array2 = Enumerable.Range(0, 1000).Select(i => 1).ToList();
+
+            var clock = new Stopwatch();
+            clock.Reset();
+            clock.Start();
+            var result = LinqCollections.Merge((a, b) => a - b,true, array1, array2).ToList();
+            clock.Stop();
+
+            Assert.AreEqual(2, result.Count);
+            for (int i = 1; i < result.Count; i++)
+            {
+                Assert.IsTrue(result[i - 1] <= result[i]);
+            }
+        }
     }
 }

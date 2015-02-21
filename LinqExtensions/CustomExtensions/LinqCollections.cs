@@ -69,13 +69,10 @@ namespace LinqExtensions.CustomExtensions
 
         public static IEnumerable<T> Merge<T>(Func<T, T, int> compare, bool removeDuplicates, params IList<T>[] toMerge)
         {
-            
-        }
-
-        public static IEnumerable<T> Merge<T>(Func<T,T,int> compare,params IList<T>[] toMerge)
-        {
             var indexes = new int[toMerge.Length];
-            var queue = new SortedDictionary<T, LinkedList<Tuple<int,T>>>(new LinqDynamicComparer<T>(compare));
+            var comparer = new LinqDynamicComparer<T>(compare);
+            var queue = new SortedDictionary<T, LinkedList<Tuple<int, T>>>(comparer);
+            var unique = new SortedSet<T>(comparer);
 
             int completed = 0;
             int i = 0;
@@ -83,15 +80,15 @@ namespace LinqExtensions.CustomExtensions
             for (i = 0; i < toMerge.Length; i++)
             {
                 current = toMerge[i][0];
-                AddToQueue(queue, current, i);
+                AddToQueue(removeDuplicates, unique, current, queue, i);
             }
 
-            KeyValuePair<T, LinkedList<Tuple<int,T>>> top;
+            KeyValuePair<T, LinkedList<Tuple<int, T>>> top;
             int idx;
-            while (completed != toMerge.Length)
+            while (completed != toMerge.Length && queue.Count != 0)
             {
                 top = queue.First();
-                queue.Remove(top.Key);
+                queue.Remove(top.Key);    
 
                 foreach (var pair in top.Value)
                 {
@@ -102,7 +99,7 @@ namespace LinqExtensions.CustomExtensions
                     ++indexes[idx];
                     if (indexes[idx] != toMerge[idx].Count)
                     {
-                        AddToQueue(queue,current,idx);
+                        AddToQueue(removeDuplicates,unique,current,queue,idx);
                     }
                     else
                     {
@@ -112,13 +109,29 @@ namespace LinqExtensions.CustomExtensions
             }
         }
 
+        private static void AddToQueue<T>(bool removeDuplicates, SortedSet<T> unique, T current, SortedDictionary<T, LinkedList<Tuple<int, T>>> queue, int i)
+        {
+            if (!removeDuplicates || !unique.Contains(current))
+            {
+                AddToQueue(queue, current, i);
+                if (removeDuplicates)
+                {
+                    unique.Add(current);
+                }
+            }
+        }
+
+        public static IEnumerable<T> Merge<T>(Func<T,T,int> compare,params IList<T>[] toMerge)
+        {
+            return Merge(compare, false, toMerge);
+        }
+
         private static void AddToQueue<T>(SortedDictionary<T, LinkedList<Tuple<int, T>>> queue, T current, int i)
         {
             if (!queue.ContainsKey(current))
             {
                 queue.Add(current, new LinkedList<Tuple<int, T>>());
             }
-
             queue[current].AddLast(new Tuple<int, T>(i, current));
         }
 

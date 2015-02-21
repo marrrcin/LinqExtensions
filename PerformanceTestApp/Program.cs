@@ -13,7 +13,7 @@ namespace PerformanceTestApp
         static void Main(string[] args)
         {
             const int spread = 1009;
-            for (int i = spread; i <= 1600000; i+=50000)
+            for (int i = spread; i <= 1551010; i+=50000)
             {
                 MergeTest(i, spread);
             }
@@ -34,10 +34,15 @@ namespace PerformanceTestApp
                 arrays[i%spread].Add(i);
             }
 
+            for (int i = 0; i < spread; i++)
+            {
+                arrays[i].Sort();
+            }
+
             var clock = new Stopwatch();
             clock.Reset();
             clock.Start();
-            var result = LinqCollections.Merge((a, b) => a - b, arrays).ToList();
+            var result = LinqCollections.Merge((a, b) => a - b, false,arrays).ToList();
             clock.Stop();
             Console.WriteLine("{0}\t{1}",count,clock.ElapsedMilliseconds);
         }
