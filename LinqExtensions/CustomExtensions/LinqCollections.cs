@@ -135,34 +135,20 @@ namespace LinqExtensions.CustomExtensions
             queue[current].AddLast(new Tuple<int, T>(i, current));
         }
 
-        public static Tuple<int, T> MinWithIndexWithSkipping<T>(this IList<T> collection, Func<T, T, bool> compare,
-            int[] indexesToSkip)
+        public static Tuple<int, T> MinWithIndex<T>(this IList<T> collection,Func<T,T,bool> compare)
         {
-            var forbidden = new HashSet<int>(indexesToSkip);
-            int firstIndex = 0;
-            if (indexesToSkip != null && indexesToSkip.Length > 0)
+            T min = collection[0];
+            int index = 0;
+
+            for (int idx = 1; idx < collection.Count; idx++)
             {
-                Array.Sort(indexesToSkip);
-                firstIndex = Enumerable.Range(0, collection.Count).FirstOrDefault(idx => !forbidden.Contains(idx));
-            }
-            
-            T min = collection[firstIndex];
-            int index = firstIndex;
-            
-            for (int idx = firstIndex+1; idx < collection.Count; idx++)
-            {
-                if(!forbidden.Contains(idx) && compare(min, collection[idx]))
+                if (compare(min, collection[idx]))
                 {
                     min = collection[idx];
                     index = idx;
                 }
             }
             return new Tuple<int, T>(index, min);
-        }
-
-        public static Tuple<int, T> MinWithIndex<T>(this IList<T> collection,Func<T,T,bool> compare)
-        {
-            return MinWithIndexWithSkipping(collection, compare, null);
         }
         
     }
