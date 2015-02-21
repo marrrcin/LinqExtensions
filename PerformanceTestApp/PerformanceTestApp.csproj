@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BB3A5D9E-241A-470A-9F58-DB2EA936D22F}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{BD0E52B6-D483-4782-9284-17C08415775D}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LinqExtensions</RootNamespace>
-    <AssemblyName>LinqExtensions</AssemblyName>
+    <RootNamespace>PerformanceTestApp</RootNamespace>
+    <AssemblyName>PerformanceTestApp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -39,13 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomExtensions\LinqCollections.cs" />
-    <Compile Include="CustomExtensions\LinqLoops.cs" />
-    <Compile Include="CustomExtensions\LinqPermutations.cs" />
-    <Compile Include="CustomExtensions\LinqShuffle.cs" />
-    <Compile Include="LambdaWrappers\LinqDistinctLambda.cs" />
-    <Compile Include="LambdaWrappers\LinqOrderByLambda.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LinqExtensions\LinqExtensions.csproj">
+      <Project>{bb3a5d9e-241a-470a-9f58-db2ea936d22f}</Project>
+      <Name>LinqExtensions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
