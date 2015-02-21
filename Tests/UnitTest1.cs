@@ -59,7 +59,7 @@ namespace Tests
             var array1 = Enumerable.Range(0, 10).Where(i => (i & 1) == 1).ToList();
             var array2 = Enumerable.Range(0, 10).Where(i => (i & 1) == 0).ToList();
 
-            var result = LinqCollections.Merge((a, b) => a > b, array1, array2).ToList();
+            var result = LinqCollections.Merge((a, b) => a - b, array1, array2).ToList();
 
             Assert.AreEqual(array1.Count + array2.Count, result.Count);
             for (int i = 1; i < result.Count; i++)
@@ -75,7 +75,7 @@ namespace Tests
             var array2 = Enumerable.Range(0, 15).Where(i=>i%3==1).ToList();
             var array3 = Enumerable.Range(0, 15).Where(i=>i%3==2).ToList();
 
-            var result = LinqCollections.Merge((a, b) => a > b, array1, array2,array3).ToList();
+            var result = LinqCollections.Merge((a, b) => a - b, array1, array2,array3).ToList();
 
             Assert.AreEqual(array1.Count + array2.Count + array3.Count, result.Count);
             for (int i = 1; i < result.Count; i++)
@@ -93,7 +93,7 @@ namespace Tests
             var clock = new Stopwatch();
             clock.Reset();
             clock.Start();
-            var result = LinqCollections.Merge((a, b) => a > b, array1, array2).ToList();
+            var result = LinqCollections.Merge((a, b) => a - b, array1, array2).ToList();
             clock.Stop();
 
             Assert.AreEqual(array1.Count + array2.Count, result.Count);

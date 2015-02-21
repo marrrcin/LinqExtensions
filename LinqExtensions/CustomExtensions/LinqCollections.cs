@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using LinqExtensions.LambdaWrappers;
 
 namespace LinqExtensions.CustomExtensions
 {
@@ -66,46 +67,37 @@ namespace LinqExtensions.CustomExtensions
             }
         }
 
-        public static IEnumerable<T> Merge<T>(Func<T,T,bool> compare,params IList<T>[] toMerge)
+        public static IEnumerable<T> Merge<T>(Func<T,T,int> compare,params IList<T>[] toMerge)
         {
-            var allCount = toMerge.Aggregate(0, (sum, arrayToMerge) => sum + arrayToMerge.Count);
+            toMerge.Aggregate(0, (sum, arrayToMerge) => sum + arrayToMerge.Count);
             var indexes = new int[toMerge.Length];
-            var current = new List<T>(toMerge.Length);
-            Enumerable.Range(0,toMerge.Length).ToList().ForEach(f=>current.Add(default(T)));;
-            var isCompleted = new bool[toMerge.Length];
+            var queue = new SortedDictionary<T, int>(new LinqDynamicComparer<T>(compare));
+
             int completed = 0;
-            int i = 0, minIdx = 0;
-            T min = default (T);
+            int i = 0;
+
+            for (i = 0; i < toMerge.Length; i++)
+            {
+                queue.Add(toMerge[i][0], i);
+            }
+
+            KeyValuePair<T, int> top;
             while (completed != toMerge.Length)
             {
-                
-                for (i = 0; i < toMerge.Length; i++)
-                {
-                    if (!isCompleted[i])
-                    {
-                        min = toMerge[i][indexes[i]];
-                        minIdx = i;
-                        break;
-                    }
-                }
+                top = queue.First();
+                queue.Remove(top.Key);
 
-                for (i = 0; i < toMerge.Length; i++)
+                ++indexes[top.Value];
+                if (indexes[top.Value] != toMerge[top.Value].Count)
                 {
-                    if (!isCompleted[i] && compare(min,toMerge[i][indexes[i]]))
-                    {
-                        min = toMerge[i][indexes[i]];
-                        minIdx = i;
-                    }
+                    queue.Add(toMerge[top.Value][indexes[top.Value]],top.Value);
                 }
-
-                ++indexes[minIdx];
-                if (indexes[minIdx] == toMerge[minIdx].Count)
+                else
                 {
-                    isCompleted[minIdx] = true;
                     ++completed;
                 }
 
-                yield return min;
+                yield return top.Key;
             }
         }
 

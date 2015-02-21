@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,14 +12,17 @@ namespace PerformanceTestApp
     {
         static void Main(string[] args)
         {
-            MergeTest();
+            const int spread = 1009;
+            for (int i = spread; i <= 1600000; i+=50000)
+            {
+                MergeTest(i, spread);
+            }
+            
             Console.ReadKey();
         }
 
-        private static void MergeTest()
+        private static void MergeTest(int count, int spread)
         {
-            const int spread = 1009;
-            const int count = 1000000;
             var arrays = new List<int>[spread];
             for (int i = 0; i < spread; i++)
             {
@@ -30,8 +34,12 @@ namespace PerformanceTestApp
                 arrays[i%spread].Add(i);
             }
 
-            var result = LinqCollections.Merge((a, b) => a > b, arrays).ToList();
-            Console.WriteLine(result[0]);
+            var clock = new Stopwatch();
+            clock.Reset();
+            clock.Start();
+            var result = LinqCollections.Merge((a, b) => a - b, arrays).ToList();
+            clock.Stop();
+            Console.WriteLine("{0}\t{1}",count,clock.ElapsedMilliseconds);
         }
     }
 }
